@@ -16,6 +16,7 @@ function createWindow() {
       preload: join(__dirname, '../preload/index.js'),
       sandbox: false
     },
+    icon: icon
   })
 
   ipcMain.handle("api:createFile",(event, path, content)=>{
