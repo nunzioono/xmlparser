@@ -181,12 +181,12 @@ function App() {
                     dest= xmlstring.substring(xmlstring.indexOf(">",xmlstring.indexOf("<Dest"))+1,xmlstring.indexOf("</Dest>")).replaceAll(/(?:\r\n|\r|\n)/g,"\\n");
                     result.push(xmlstrings[i].replace(newedid,edid))
                     const fields=inistrings[i].split("=\"")
-                    let value=fields[1].replace("\"","").replaceAll("\\n","\n")
+                    let value=fields[1].replace("\"","").replaceAll("\\n","\r\n")
                     result[i+1]=[result[i+1].slice(0,result[i+1].indexOf("<Dest>")+6),value,result[i+1].slice(result[i+1].indexOf("</Dest>"),result[i+1].length)].join("")
                   })
                   let resultarray=Array.from(result)
                   console.log("result array: ",resultarray)
-                  let xmltradotto="<String "+(resultarray.join("<String "))
+                  let xmltradotto=(resultarray.join("<String "))
                   window.electron.ipcRenderer.invoke("api:createFile",file1.path.replace(".xml","_tradotto.xml"),xmltradotto)
                   .then((callbackresult)=>{
                     console.log("File created")
