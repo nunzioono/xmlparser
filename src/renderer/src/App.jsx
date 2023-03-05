@@ -11,7 +11,8 @@ function App() {
         </div>
         <div className='d-flex flex-column justify-content-between mb-3'>
           <button className='btn mb-2' data-bs-toggle="modal" data-bs-target="#Modal1">Converti Xml in Ini</button>
-          <button className='btn' data-bs-toggle="modal" data-bs-target="#Modal2">Aggiorna Xml Tradotto</button>
+          <button className='btn mb-2' data-bs-toggle="modal" data-bs-target="#Modal2">Aggiorna Xml Tradotto</button>
+          <button className='btn' data-bs-toggle="modal" data-bs-target="#Modal3">Unisci glossari</button>
         </div>
       </div>
 
@@ -27,7 +28,7 @@ function App() {
           </div>
           <div className="modal-body">
             <div className="mb-3">
-              <label className='form-label'>Inserisci il file xml</label>
+              <label className='form-label' htmlFor='inputGroupFile01'>Inserisci il file xml</label>
               <input type="file" className="btn form-control" id="inputGroupFile01" accept=".xml" required/>
               <div className="invalid-feedback">
                 Inserisci il file correto, in formato xml ed estratto da xTranslator, per continuare
@@ -86,20 +87,11 @@ function App() {
                 window.electron.ipcRenderer.invoke("api:createFile",outpath,inistrings)
                 .then((data)=>{
                   console.log("Fine scrittura file ini.")
-                  const img= document.createElement("img");
-                  img.src="./src/assets/done.png"
-                  img.width="32"
-                  img.height="32"
-                  e.target.innerText=""
-                  e.target.appendChild(img)
                   const closeButton= document.getElementById("Modal1Close");
                   closeButton.click()
                   Array.from(document.getElementsByTagName("form")).forEach((form)=>{
                     form.reset();
                   });
-                  const button= document.querySelector("[type=\"submit\"]")
-                  button.removeChild(img)
-                  button.innerText="Scarica Ini"
                 })
                 .catch((err)=>{
                 })
@@ -128,19 +120,19 @@ function App() {
         <div className="modal-content">
           <div className="modal-header">
             <h1 className="modal-title fs-5" id="exampleModalLabel">Aggiorna Xml Tradotto</h1>
-            <button type="button" className="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            <button id="Modal2Close" type="button" className="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
           </div>
           <div className="modal-body w-100">
             <div className="input-group w-100 d-flex flex-column mb-3">
             <div className='mb-4'>
-                <label className='form-label text-dark' htmlFor='inputGroupFile2'>Inserisci il file xml originale:</label>
+                <label className='form-label text-dark' htmlFor='inputGroupFile02'>Inserisci il file xml originale:</label>
                 <input type="file" className="btn w-100  form-control" id="inputGroupFile02" accept='.xml' required/>
                 <div className="invalid-feedback">
 
                 </div>
               </div>
               <div className='mb-2'>
-                <label className='form-label text-dark' htmlFor='inputGroupFile3'>Inserisci il file ini scaricato da Transifex o in cui hai effettuato le traduzioni:</label>
+                <label className='form-label text-dark' htmlFor='inputGroupFile03'>Inserisci il file ini scaricato da Transifex o in cui hai effettuato le traduzioni:</label>
                 <input type="file" className="btn w-100 form-control" id="inputGroupFile03" accept='.ini' required/>
                 <div className="invalid-feedback">
                   Inserisci il file correto, in formato joomla ini scaricato da Transifex, per continuare
@@ -190,6 +182,11 @@ function App() {
                   window.electron.ipcRenderer.invoke("api:createFile",file1.path.replace(".xml","_tradotto.xml"),xmltradotto)
                   .then((callbackresult)=>{
                     console.log("File created")
+                    const closeButton= document.getElementById("Modal2Close");
+                    closeButton.click()
+                    Array.from(document.getElementsByTagName("form")).forEach((form)=>{
+                      form.reset();
+                    });
                   })
                   .catch((err)=>{console.log(err)})
                 })
@@ -198,6 +195,56 @@ function App() {
               .catch((err)=>{console.log(err)})
 
             }}>Scarica Xml Aggiornato</button>
+          </div>
+        </div>
+      </div>
+      </form>
+    </div>
+
+    <div className="modal fade" id="Modal3" tabIndex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+      <form className="needs-validation" noValidate>    
+      <div className="modal-dialog">
+        <div className="modal-content">
+          <div className="modal-header">
+            <h1 className="modal-title fs-5" id="exampleModalLabel">Unisci glossari</h1>
+            <button id="Modal3Close" type="button" className="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div className="modal-body w-100">
+            <div className="input-group w-100 d-flex flex-column mb-3">
+
+              <div className='mb-2'>
+                <label className='form-label text-dark' htmlFor='inputGroupFile04'>Inserisci i file glossario (.csv)</label>
+                <input type="file" className="btn w-100 form-control" id="inputGroupFile04" accept='.csv' multiple required/>
+                <div className="invalid-feedback">
+                  Inserisci i file in formato csv
+                </div>
+              </div>
+
+            </div>
+          </div>
+          <div className="modal-footer d-flex justify-content-center">
+            <button type="submit" className="btn" onClick={(e)=>{
+              e.preventDefault();
+              const glossaries= document.getElementById("inputGroupFile04");
+              let files=glossaries.files
+              var paths=[]
+              if (files) {
+                for(let i=0;i<files.length;i++)
+                {
+                  paths.push(files[i].path);
+                }
+              }
+              window.electron.ipcRenderer.invoke("api:appendFile",paths)
+              .then((success)=>{
+                console.log(success)
+                const closeButton= document.getElementById("Modal3Close");
+                closeButton.click()
+                Array.from(document.getElementsByTagName("form")).forEach((form)=>{
+                  form.reset();
+                });
+              })
+              .catch((err)=>console.log(err))
+            }}>Scarica Glossario</button>
           </div>
         </div>
       </div>

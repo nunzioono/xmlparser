@@ -19,16 +19,6 @@ function createWindow() {
     icon: icon
   })
 
-  ipcMain.handle("api:createFile",(event, path, content)=>{
-    writeFile(path,content,function(err,result){
-      if(err)
-        return;
-      console.log("Created file at "+path)
-      return result;
-    });
-    return;
-  })
-
   function openFile(finalpath){
     return new Promise((resolve,reject)=>{
       readFile(finalpath,{encoding: 'utf-8'},(err,data)=>{
@@ -40,12 +30,60 @@ function createWindow() {
     })
   }
 
+  ipcMain.handle("api:appendFile",async (event,paths)=>{
+    console.log("Invoked append file with paths:\n"+paths.join("\n"))
+    let data=[]
+    for(let i=0; i<paths.length; i++)
+    {
+      const newlines=await openFile(paths[i])
+      .then(content=>{
+        let resultlines=[];
+        const lines=content.split("\n");
+        for(let j=0;j<lines.length;j++)
+        {
+          if(!data.includes(lines[j]))
+          {
+            resultlines.push(lines[j])
+          }
+        }
+        if(resultlines.length>0)
+          return resultlines;
+      })
+      .catch(err=>console.log(err))
+      console.log("File "+paths[i]+" produced newlines:\n"+newlines)
+      if(newlines)
+        newlines.forEach(line=>data.push(line))
+    }
+    const outpath= paths[0].replace(paths[0].substring(paths[0].lastIndexOf("\\")),"\\glossario.csv");
+    const finaldata= data.filter(line=>{
+      if(line!="\n")return line;
+    }).join("\n");
+    writeFile(outpath,finaldata,function(err){
+      if(err){
+        console.log(err);
+        return;
+      }
+      console.log("Created file at "+outpath+" with content:\n"+finaldata);
+    })
+  })
+
+  ipcMain.handle("api:createFile",(event, path, content)=>{
+    writeFile(path,content,function(err,result){
+      if(err)
+        return;
+      console.log("Created file at "+path)
+      return result;
+    });
+    return;
+  })
+
+
+
   ipcMain.handle("api:readFile",async (event, path)=>{
     console.log("Invoked read file with path: "+path)
     return await openFile(path)
     .then(data=>data)
-    .catch(err=>err)
-    
+    .catch(err=>err)    
   })
 
   mainWindow.on('ready-to-show', () => {
