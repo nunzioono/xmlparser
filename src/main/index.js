@@ -41,20 +41,20 @@ function createWindow() {
         const lines=content.split("\n");
         for(let j=0;j<lines.length;j++)
         {
-          if(!data.includes(lines[j]))
-          {
-            parts=lines[j].split(",")
-            occurrencies=0;
+          if(j!=lines.length-1){
+            let parts=lines[j].split(",")
+            let occurrencies=0;
             for(let z=0;z<data.length;z++)
             {
-              existingparts=data[z].split(",")
+              let existingparts=data[z].split(",")
               if(existingparts.includes(parts[0]))
               {
                 occurrencies++;
               }
             }
-            parts[0]=parts[0]+occurrencies
-            lines[j]=parts.join(",")
+            if(occurrencies>0)
+              parts[0]=parts[0]+"("+occurrencies+")"
+            lines[j]=parts.join(",")  
           }
           resultlines.push(lines[j])
         }
