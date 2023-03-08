@@ -43,8 +43,20 @@ function createWindow() {
         {
           if(!data.includes(lines[j]))
           {
-            resultlines.push(lines[j])
+            parts=lines[j].split(",")
+            occurrencies=0;
+            for(let z=0;z<data.length;z++)
+            {
+              existingparts=data[z].split(",")
+              if(existingparts.includes(parts[0]))
+              {
+                occurrencies++;
+              }
+            }
+            parts[0]=parts[0]+occurrencies
+            lines[j]=parts.join(",")
           }
+          resultlines.push(lines[j])
         }
         if(resultlines.length>0)
           return resultlines;
