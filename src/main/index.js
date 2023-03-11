@@ -37,46 +37,37 @@ function createWindow() {
     {
       const newlines=await openFile(paths[i])
       .then(content=>{
-        let resultlines=[];
-        const lines=content.split("\n");
-        for(let j=0;j<lines.length;j++)
-        {
-          if(j!=lines.length-1){
-            let parts=lines[j].split(",")
-            let occurrencies=0;
-            for(let z=0;z<data.length;z++)
-            {
-              let existingparts=data[z].split(",")
-              if(existingparts.includes(parts[0]))
-              {
-                occurrencies++;
-              }
-            }
-            if(occurrencies>0)
-              parts[0]=parts[0]+"("+occurrencies+")"
-            lines[j]=parts.join(",")  
-          }
-          resultlines.push(lines[j])
-        }
-        if(resultlines.length>0)
-          return resultlines;
+        let newcontent=content.split("\n");
+        newcontent.splice(0,1);
+        newcontent.splice(newcontent.length-1,1);
+        return newcontent;
       })
       .catch(err=>console.log(err))
-      console.log("File "+paths[i]+" produced newlines:\n"+newlines)
-      if(newlines)
-        newlines.forEach(line=>data.push(line))
+      console.log("File "+paths[i]+" produced newlines\n")
+      data=[...data,...newlines];
+    }
+    let duplicates=[];
+    for(let i=0;i<data.length;i++){
+      let term= data[i].substring(1,data[i].indexOf("\"",1)).trim();
+      let nduplicates= duplicates.filter(line=>line==term).length;
+      if(nduplicates>0){
+        data[i]=data[i].replace(data[i].substring(0,data[i].indexOf("\"",1)+1),"\""+term+"("+nduplicates+")\"");
+      }
+      duplicates.push(term);
     }
     const outpath= paths[0].replace(paths[0].substring(paths[0].lastIndexOf("\\")),"\\glossario.csv");
-    const finaldata= data.filter(line=>{
+    let finaldata= data.filter(line=>{
       if(line!="\n")return line;
-    }).join("\n");
+    });
+    finaldata.splice(0,0,"term,pos,note,is_case_sensitive,translation_it");
+    finaldata=finaldata.join("\n");
     writeFile(outpath,finaldata,function(err){
       if(err){
         console.log(err);
         return;
       }
-      console.log("Created file at "+outpath+" with content:\n"+finaldata);
-    })
+      console.log("Created file at "+outpath);
+    });
   })
 
   ipcMain.handle("api:createFile",(event, path, content)=>{
