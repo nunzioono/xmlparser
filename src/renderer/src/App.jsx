@@ -51,6 +51,7 @@ function App() {
                 console.log(data)
                 console.log("Inizio lettura di stringhe...")
                 let inistrings=""
+                let inistringstradotte=""
                 let xmlstrings=""
                 const strings= data.split("<String ")
                 xmlstrings+=strings[0]
@@ -73,6 +74,7 @@ function App() {
                   }
                   let newedid=edid+"/"+occurrencies;
                   inistrings+=newedid+"=\""+source+"\"\n";
+                  inistringstradotte+=newedid+"=\""+dest+"\"\n";
                   console.log(string)
                   string=string.replace(edid,newedid)
                   console.log(string)
@@ -95,6 +97,24 @@ function App() {
                 })
                 .catch((err)=>{
                 })
+
+                console.log("Fine lettura di stringhe.")
+                const outpath2=file.path.replace(".xml","_dest.ini")
+                console.log(outpath2)
+                console.log("Inizio scrittura file ini...")
+                window.electron.ipcRenderer.invoke("api:createFile",outpath2,inistringstradotte)
+                .then((data)=>{
+                  console.log("Fine scrittura file ini.")
+                  const closeButton= document.getElementById("Modal1Close");
+                  closeButton.click()
+                  Array.from(document.getElementsByTagName("form")).forEach((form)=>{
+                    form.reset();
+                  });
+                })
+                .catch((err)=>{
+                })
+
+
                 console.log("Inizio scrittura file xml...")
                 window.electron.ipcRenderer.invoke("api:createFile",file.path,xmlstrings)
                 .then((data)=>{
