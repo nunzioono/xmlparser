@@ -192,8 +192,14 @@ function App() {
                     source= xmlstring.substring(xmlstring.indexOf(">",xmlstring.indexOf("<Source"))+1,xmlstring.indexOf("</Source>")).replaceAll(/(?:\r\n|\r|\n)/g,"\\n");
                     dest= xmlstring.substring(xmlstring.indexOf(">",xmlstring.indexOf("<Dest"))+1,xmlstring.indexOf("</Dest>")).replaceAll(/(?:\r\n|\r|\n)/g,"\\n");
                     result.push(xmlstrings[i].replace(newedid,edid))
-                    const fields=inistrings[i].split("=\"")
-                    let value=fields[1].replace("\"","").replaceAll("\\n","\r\n")
+                    let value;
+                    for(let j=0;j<inistrings.length;j++){
+                      const fields=inistrings[j].split("=\"")
+                      if(fields[0]==newedid){
+                        value=fields[1].replace("\"","").replaceAll("\\n","\r\n");
+                        break;
+                      }
+                    }
                     result[i+1]=[result[i+1].slice(0,result[i+1].indexOf("<Dest>")+6),value,result[i+1].slice(result[i+1].indexOf("</Dest>"),result[i+1].length)].join("")
                   })
                   let resultarray=Array.from(result)
